@@ -17,6 +17,7 @@ class OntolyAlignmentApp:
         self.create_similarities()
         self.create_ontologies()
         self.create_alignment()
+
     
     def create_header(self):
         self.headerFrame = HeaderFrame(self.root)
@@ -25,6 +26,7 @@ class OntolyAlignmentApp:
     def create_similarities(self):
         self.similaritiesFrame = SimilaritiesFrame(self.root)
         self.similaritiesFrame.pack()
+
 
     def create_ontologies(self):
         self.ontologiesFrame = OntologiesFrame(self.root)

@@ -5,4 +5,4 @@ class HeaderFrame(ctk.CTkFrame):
         super().__init__(master, border_width=1, height=50, width=1000, border_color="red")
         
         title = ctk.CTkLabel(self, text="Ontology Alignment", font=("Arial", 20))
-        title.place(anchor="w")
+        title.place(anchor="w", relx= 0.01, rely=0.5)
