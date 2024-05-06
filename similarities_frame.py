@@ -14,7 +14,7 @@ class SimilaritiesFrame(ctk.CTkFrame):
         self.lexical_similarity_check.select()
         self.lexical_similarity_check_info = True
 
-        self.lexical_similarity_options = ctk.CTkOptionMenu(self, values=["Jaccard", "Cosine", "Levenshtein"])
+        self.lexical_similarity_options = ctk.CTkOptionMenu(self, values=["Jaccard", "Levenshtein", "Binary", "Masi", "Jaro", "Jaro-Winkler"])
         self.lexical_similarity_options.place(anchor="w", relx=0.18, rely=0.3)
 
         self.llm_check = ctk.CTkCheckBox(self, text="LLM", font=("Arial", 15))

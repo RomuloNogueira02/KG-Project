@@ -1,5 +1,7 @@
 from functions import *
 import time
+from nltk.metrics import binary_distance, edit_distance, jaccard_distance, masi_distance
+from jarowinkler import jaro_similarity, jarowinkler_similarity
 
 # I think we should have a class for the ontology alignment, where executes all the pipeline.
 # With this class we can personalize the pipeline, running different ways to align ontologies.
@@ -15,6 +17,8 @@ class OntologyAlignment:
         self.labels_o2 = get_labels(self.ontology2)
 
         self.lexical_similarity = lexical_similarity
+
+        self.define_lexical_function()
 
     # Ontology is 1 or 2 
     def getClassesOntology(self, ontology:int) -> list:
@@ -41,22 +45,37 @@ class OntologyAlignment:
         else:
             raise ValueError("The ontology must be 1 or 2")
         
+    def define_lexical_function(self):
+        if self.lexical_similarity == "Jaccard":
+            self.func = jaccard_distance
+        elif self.lexical_similarity == "Levenshtein":
+            self.func = edit_distance
+        elif self.lexical_similarity == "Binary":
+            self.func = binary_distance
+        elif self.lexical_similarity == "Masi":
+            self.func = masi_distance
+        elif self.lexical_similarity == "Jaro":
+            self.func = jaro_similarity
+        elif self.lexical_similarity == "Jaro-Winkler":
+            self.func = jarowinkler_similarity
+        else:
+            raise ValueError("The lexical similarity must be Jaccard, Levenshtein, Binary, Masi, Jaro or Jaro-Winkler")
+        
     def compute_lexical_similarity(self) -> dict:
-        labels1, labels2 = normalize_labels(self.labels_o1, self.lexical_similarity), normalize_labels(self.labels_o2, self.lexical_similarity)
-        func = jaccard_similarity 
-        if self.lexical_similarity == "Levenshtein":
-            func = levenshtein_similarity
-        elif self.lexical_similarity == "Cosine":
-            pass
+        labels1 = list(map(normalize_string, self.labels_o1))
+        labels2 = list(map(normalize_string, self.labels_o2))
 
-        # print(labels1)
+        if self.lexical_similarity == "Jaccard" or self.lexical_similarity == "Masi":
+            labels1 = list(map(lambda x: set(x.split()), labels1))
+            labels2 = list(map(lambda x: set(x.split()), labels2))
+ 
 
         scores = {}
         for l1 in labels1:
             for l2 in labels2:
-                str_l1 = " ".join(l1) if self.lexical_similarity == "Jaccard" else l1
-                str_l2 = " ".join(l2) if self.lexical_similarity == "Jaccard" else l2
-                scores[(str_l1, str_l2)] = func(l1, l2)
+                str_l1 = " ".join(l1) if self.lexical_similarity in ["Jaccard", "Masi"] else l1
+                str_l2 = " ".join(l2) if self.lexical_similarity in ["Jaccard", "Masi"] else l2
+                scores[(str_l1, str_l2)] = self.func(l1, l2)
 
         return scores
 
