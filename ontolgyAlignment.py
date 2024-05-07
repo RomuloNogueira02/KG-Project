@@ -100,7 +100,10 @@ class OntologyAlignment:
             for l2 in labels2:
                 str_l1 = " ".join(l1) if self.lexical_similarity in ["Jaccard", "Masi"] else l1
                 str_l2 = " ".join(l2) if self.lexical_similarity in ["Jaccard", "Masi"] else l2
-                scores[(str_l1, str_l2)] = self.func(l1, l2)
+                if self.lexical_similarity == "Jaccard":
+                    scores[(str_l1, str_l2)] = 1 - self.func(l1, l2)
+                else:
+                    scores[(str_l1, str_l2)] = self.func(l1, l2)
 
         return scores
 
