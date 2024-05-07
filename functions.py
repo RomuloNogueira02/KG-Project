@@ -12,7 +12,7 @@ def loadOntology(path: str) -> Ontology:
     
 def get_labels(ontology):
     # Get labels from ontology that are not empty
-    raw_labels = list(map(lambda entity: entity.label[0] if len(entity.label) > 0 else "", ontology.classes()))
+    raw_labels = list(map(lambda entity: normalize_string(entity.label[0]) if len(entity.label) > 0 else "", ontology.classes()))
     filtered_labels = list(filter(lambda label: label != "", raw_labels))
     return filtered_labels
 

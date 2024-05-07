@@ -2,13 +2,14 @@ from functions import *
 import time
 from nltk.metrics import binary_distance, edit_distance, jaccard_distance, masi_distance
 from jarowinkler import jaro_similarity, jarowinkler_similarity
+from sentence_transformers import SentenceTransformer, util
 
 # I think we should have a class for the ontology alignment, where executes all the pipeline.
 # With this class we can personalize the pipeline, running different ways to align ontologies.
 
 class OntologyAlignment:
 
-    def __init__(self, path_o1, path_o2, lexical_similarity= "Jaccard", LLM=True) -> None:
+    def __init__(self, path_o1, path_o2, lexical_similarity= "Jaccard", llm="all-mpnet-base-v2") -> None:
         
         self.ontology1 = loadOntology(path_o1)
         self.ontology2 = loadOntology(path_o2)
@@ -16,8 +17,14 @@ class OntologyAlignment:
         self.labels_o1 = get_labels(self.ontology1)
         self.labels_o2 = get_labels(self.ontology2)
 
+        set_labels = set(self.labels_o1).union(set(self.labels_o2))
+
         self.lexical_similarity = lexical_similarity
 
+        # Ver isto melhor se é suposto ser assim
+        self.llm = SentenceTransformer(llm)
+
+        self.load_embeddings(set_labels)
         self.define_lexical_function()
 
     # Ontology is 1 or 2 
@@ -61,9 +68,27 @@ class OntologyAlignment:
         else:
             raise ValueError("The lexical similarity must be Jaccard, Levenshtein, Binary, Masi, Jaro or Jaro-Winkler")
         
+    def load_embeddings(self, set_labels: set):
+        self.string_embedding = {}
+        for label in set_labels:
+            self.string_embedding[label] = self.llm.encode(label)
+            
+    def compute_embedding_similarity(self) -> dict:
+        labels1 = self.labels_o1
+        labels2 = self.labels_o2
+        
+        scores = {}
+        for l1 in labels1:
+            for l2 in labels2:
+                embedding1 = self.string_embedding[l1]
+                embedding2 = self.string_embedding[l2]
+                scores[(l1, l2)] = util.cos_sim(embedding1, embedding2)[0][0].item()
+
+        return scores
+        
     def compute_lexical_similarity(self) -> dict:
-        labels1 = list(map(normalize_string, self.labels_o1))
-        labels2 = list(map(normalize_string, self.labels_o2))
+        labels1 = self.labels_o1
+        labels2 = self.labels_o2
 
         if self.lexical_similarity == "Jaccard" or self.lexical_similarity == "Masi":
             labels1 = list(map(lambda x: set(x.split()), labels1))
