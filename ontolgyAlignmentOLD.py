@@ -7,7 +7,7 @@ from sentence_transformers import SentenceTransformer, util
 # I think we should have a class for the ontology alignment, where executes all the pipeline.
 # With this class we can personalize the pipeline, running different ways to align ontologies.
 
-class OntologyAlignment:
+class OntologyAlignmentOLD:
 
     def __init__(self, path_o1, path_o2, lexical_similarity= "Jaccard", llm="all-mpnet-base-v2") -> None:
         
@@ -17,15 +17,17 @@ class OntologyAlignment:
         self.labels_o1 = get_labels(self.ontology1)
         self.labels_o2 = get_labels(self.ontology2)
 
-        set_labels = set(self.labels_o1).union(set(self.labels_o2))
-
-        self.lexical_similarity = lexical_similarity
-
         # Ver isto melhor se é suposto ser assim
         self.llm = SentenceTransformer(llm)
 
-        self.load_embeddings(set_labels)
+        self.lexical_similarity = lexical_similarity
         self.define_lexical_function()
+
+        # Binary distance to start the final_alignment
+        self.define_final_alignment()
+
+        # Get the embeddings for the labels
+        self.load_embeddings(set(self.labels_o1 + self.labels_o2))
 
     # Ontology is 1 or 2 
     def getClassesOntology(self, ontology:int) -> list:
@@ -52,13 +54,22 @@ class OntologyAlignment:
         else:
             raise ValueError("The ontology must be 1 or 2")
         
+    def define_final_alignment(self):
+        self.final_alignment = {}
+        self.remaining_labels = {}
+        for l1 in self.labels_o1:
+            for l2 in self.labels_o2:
+                if binary_distance(l1, l2) == 0.0:
+                    self.final_alignment[(l1, l2)] = (1.0, 1.0)
+                else:
+                    self.remaining_labels[(l1, l2)] = None
+                
+        
     def define_lexical_function(self):
         if self.lexical_similarity == "Jaccard":
             self.func = jaccard_distance
         elif self.lexical_similarity == "Levenshtein":
             self.func = edit_distance
-        elif self.lexical_similarity == "Binary":
-            self.func = binary_distance
         elif self.lexical_similarity == "Masi":
             self.func = masi_distance
         elif self.lexical_similarity == "Jaro":
@@ -66,7 +77,7 @@ class OntologyAlignment:
         elif self.lexical_similarity == "Jaro-Winkler":
             self.func = jarowinkler_similarity
         else:
-            raise ValueError("The lexical similarity must be Jaccard, Levenshtein, Binary, Masi, Jaro or Jaro-Winkler")
+            raise ValueError("The lexical similarity must be Jaccard, Levenshtein, Masi, Jaro or Jaro-Winkler")
         
     def load_embeddings(self, set_labels: set):
         self.string_embedding = {}
@@ -111,6 +122,23 @@ class OntologyAlignment:
 
     def startAlignment(self):
         # Here we can start the alignment process
+        # Steps:
+        # 1. Compute binary similarity
+        # 2. 
+        # 2.1 Filter the ones with higher similarity score (>0.9) and add to the final alignment
+        # 3. create a dictionary with the remaining labels and the embeddings
+        # 4. Compute the embeddings similarity
+        # 4.1 Add the ones with higher similarity score (defined threshold by the user) to the final alignment
+        # 5. Check if the labels are 1-1 
+        # 6. Return the final alignment
+
+        # Step 1 - Compute lexical similarity
+        lexical_scores = self.compute_lexical_similarity()
+
+
+
+
+
         pass
 
 
