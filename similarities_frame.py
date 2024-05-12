@@ -12,13 +12,13 @@ class SimilaritiesFrame(ctk.CTkFrame):
         self.lexical_similarity_text = ctk.CTkLabel(self, text="Lexical Similarity: ", font=("Arial", 15))
         self.lexical_similarity_text.place(anchor="w", relx=0.01, rely=0.3)
 
-        self.lexical_similarity_options = ctk.CTkOptionMenu(self, values=["Jaccard", "Levenshtein", "Binary", "Masi", "Jaro", "Jaro-Winkler"])
+        self.lexical_similarity_options = ctk.CTkOptionMenu(self, values=["Jaccard", "Levenshtein", "Binary", "Masi", "Jaro", "Jaro-Winkler"], command=self.update_lexical_similarity)
         self.lexical_similarity_options.place(anchor="w", relx=0.15, rely=0.3)
 
         self.llm_text = ctk.CTkLabel(self, text="LLM Model: ", font=("Arial", 15))
         self.llm_text.place(anchor="w", relx=0.01, rely=0.6)
 
-        self.llm_options = ctk.CTkOptionMenu(self, values=["all-mpnet-base-v2"])
+        self.llm_options = ctk.CTkOptionMenu(self, values=["all-mpnet-base-v2"], command=self.update_llm_model)
         self.llm_options.place(anchor="w", relx=0.15, rely=0.6)
 
         self.create_infos()
@@ -57,14 +57,11 @@ class SimilaritiesFrame(ctk.CTkFrame):
         self.status.set("General State: Not ready")
 
 
-
-    def update_infos(self, val):
-
-        self.lexical_similarity.set("Wind intensity = " + str())
-        self.llm_model.set("Wind direction = " + str(self.master.children['!middlerow'].children["!sidebar"].get_wind_direction()))
-        self.ontology1_loaded.set("Type of trees = " + str(self.master.children['!middlerow'].children["!sidebar"].get_type_of_trees()))
-        self.ontology2_loaded.set("Air Humidity = " + str(self.master.children['!middlerow'].children["!sidebar"].get_air_humidity()))
-
-        self.status.set("General State: Ready!")
-        
+    def update_lexical_similarity(self, value):
+        self.lexical_similarity.set(f"Current Lexical Similarity: {value}")
+        self.master.children["!alignmentframe"].ontology_alignment.define_lexical_function(value)
     
+
+    def update_llm_model(self, value):
+        self.llm_model.set(f"Current LLM Model: {value}")
+        self.master.children["!alignmentframe"].ontology_alignment.define_llm_model(value)

@@ -19,17 +19,15 @@ class OntologiesFrame(ctk.CTkFrame):
 
     def select_ontology1(self):
         filename = filedialog.askopenfilename()
-        print(filename)
-        # Load ontology... 
-
-        return filename
+        self.master.children["!alignmentframe"].ontology_alignment.load_ontology(filename)
+        self.master.children["!similaritiesframe"].ontology1_loaded.set("Ontology 1: Loaded")
     
     def select_ontology2(self):
         filename = filedialog.askopenfilename()
-        print(filename)
-        # Load ontology... 
-
-        return filename
+        self.master.children["!alignmentframe"].ontology_alignment.load_ontology(filename)
+        self.master.children["!similaritiesframe"].ontology2_loaded.set("Ontology 2: Loaded")
+        self.master.children["!similaritiesframe"].status.set("General State: Ready")
+        
         
 
     
