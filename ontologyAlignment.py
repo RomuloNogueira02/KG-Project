@@ -35,7 +35,7 @@ class OntologyAlignment:
             self.labels_o2 = labels
             self.ontology2_loaded = True
 
-            self.load_embeddings(list(set(self.labels_o1).union(set(self.labels_o2))))
+            # self.load_embeddings(list(set(self.labels_o1).union(set(self.labels_o2))))
 
 
     def load_embeddings(self, set_labels: set):
@@ -81,11 +81,24 @@ class OntologyAlignment:
         self.remaining = {key: value for key, value in scores_lexical_similarity.items() if (value < MIN_THRESHOLD and not any(palavra in palavras_unicas for palavra in key))}
 
     def compute_cosine_similarity(self):
+
+        words = {palavra for tupla in self.remaining.keys() for palavra in tupla}
+        self.load_embeddings(words)
+
+        print("Embeddings loaded")
+
         lexical_cosine_similarity = {}
+        progress = 0
         for t in self.remaining.items():
             embedding1 = self.string_embedding[t[0][0]]
             embedding2 = self.string_embedding[t[0][1]]
             lexical_cosine_similarity[t[0]] = (t[1], util.cos_sim(embedding1, embedding2)[0][0].item())
+            progress += 1
+
+            percent = calculate_progress(progress, len(self.remaining))
+            if percent in [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+                print(f"{percent}% completed")
+
 
         self.final_alignment.update(lexical_cosine_similarity)
         self.remaining.clear()
@@ -93,6 +106,8 @@ class OntologyAlignment:
     def compute_alignment(self, MIN_THRESHOLD=0.8):
 
         self.compute_lexical_similarity(MIN_THRESHOLD)
+        print("Lexical similarity computed")
+
         self.compute_cosine_similarity()
         
         return self.final_alignment

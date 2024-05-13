@@ -31,3 +31,10 @@ def convert_seconds(sec):
     minu = sec // 60
     sec_remaining = sec % 60
     return f"{minu:02d}:{sec_remaining:02d}"
+
+
+def calculate_progress(current, total):
+    if total == 0:
+        return 100.0 if current == 0 else float('inf')
+    else:
+        return round((current / total) * 100)
