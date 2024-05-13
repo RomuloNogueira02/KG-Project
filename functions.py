@@ -37,4 +37,4 @@ def calculate_progress(current, total):
     if total == 0:
         return 100.0 if current == 0 else float('inf')
     else:
-        return round((current / total) * 100)
+        return (current / total) * 100

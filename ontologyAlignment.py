@@ -64,7 +64,7 @@ class OntologyAlignment:
             raise ValueError("The lexical similarity must be Jaccard, Levenshtein, Binary, Masi, Jaro or Jaro-Winkler")
         
 
-    def compute_lexical_similarity(self, MIN_THRESHOLD=0.8):
+    def compute_lexical_similarity(self, MIN_THRESHOLD=0.85):
         scores_lexical_similarity = {}
         for l1 in self.labels_o1:
             for l2 in self.labels_o2:
@@ -88,27 +88,30 @@ class OntologyAlignment:
         print("Embeddings loaded")
 
         lexical_cosine_similarity = {}
-        progress = 0
+        # progress = 0
         for t in self.remaining.items():
             embedding1 = self.string_embedding[t[0][0]]
             embedding2 = self.string_embedding[t[0][1]]
-            lexical_cosine_similarity[t[0]] = (t[1], util.cos_sim(embedding1, embedding2)[0][0].item())
-            progress += 1
+            lexical_cosine_similarity[t[0]] = max(t[1], util.cos_sim(embedding1, embedding2)[0][0].item())
+            # progress += 1
 
-            percent = calculate_progress(progress, len(self.remaining))
-            if percent in [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
-                print(f"{percent}% completed")
+            # percent = calculate_progress(progress, len(self.remaining))
+            # if percent in [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+            #     print(f"{percent}% completed")
 
 
         self.final_alignment.update(lexical_cosine_similarity)
         self.remaining.clear()
     
-    def compute_alignment(self, MIN_THRESHOLD=0.8):
+    def compute_alignment(self, MIN_THRESHOLD=0.80):
 
-        self.compute_lexical_similarity(MIN_THRESHOLD)
+        self.compute_lexical_similarity()
         print("Lexical similarity computed")
 
         self.compute_cosine_similarity()
+        
+        # Antes de retornar filtrar por este MIN_THRESHOLD
+        self.final_alignment = {key: value for key, value in self.final_alignment.items() if value >= MIN_THRESHOLD}
         
         return self.final_alignment
 

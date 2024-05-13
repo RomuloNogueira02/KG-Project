@@ -15,11 +15,26 @@ class SimilaritiesFrame(ctk.CTkFrame):
         self.lexical_similarity_options = ctk.CTkOptionMenu(self, values=["Jaccard", "Levenshtein", "Binary", "Masi", "Jaro", "Jaro-Winkler"], command=self.update_lexical_similarity)
         self.lexical_similarity_options.place(anchor="w", relx=0.15, rely=0.3)
 
+        # ------------------
+
         self.llm_text = ctk.CTkLabel(self, text="LLM Model: ", font=("Arial", 15))
         self.llm_text.place(anchor="w", relx=0.01, rely=0.6)
 
         self.llm_options = ctk.CTkOptionMenu(self, values=["all-mpnet-base-v2"], command=self.update_llm_model)
         self.llm_options.place(anchor="w", relx=0.15, rely=0.6)
+
+        # ------------------
+
+        self.min_threshold_text = ctk.CTkLabel(self, text="Minimum Threshold: ", font=("Arial", 15))
+        self.min_threshold_text.place(anchor="w", relx=0.01, rely=0.9)
+
+        self.min_threshold_value = tk.DoubleVar()
+        self.min_threshold_value.set(0.8)
+
+        self.min_threshold_entry = ctk.CTkEntry(self, textvariable=self.min_threshold_value)
+        self.min_threshold_entry.place(anchor="w", relx=0.15, rely=0.8)
+
+        # ------------------
 
         self.create_infos()
 
@@ -65,3 +80,7 @@ class SimilaritiesFrame(ctk.CTkFrame):
     def update_llm_model(self, value):
         self.llm_model.set(f"Current LLM Model: {value}")
         self.master.children["!alignmentframe"].ontology_alignment.define_llm_model(value)
+
+
+    def get_min_threshold(self):
+        return self.min_threshold_value.get()
