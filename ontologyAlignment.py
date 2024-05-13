@@ -3,6 +3,7 @@ import time
 from nltk.metrics import binary_distance, edit_distance, jaccard_distance, masi_distance
 from jarowinkler import jaro_similarity, jarowinkler_similarity
 from sentence_transformers import SentenceTransformer, util
+import pandas as pd
 
 
 class OntologyAlignment:
@@ -82,10 +83,12 @@ class OntologyAlignment:
 
     def compute_cosine_similarity(self):
 
+        print("Loading embeddings...")
         words = {palavra for tupla in self.remaining.keys() for palavra in tupla}
         self.load_embeddings(words)
 
         print("Embeddings loaded")
+
 
         lexical_cosine_similarity = {}
         # progress = 0
@@ -109,9 +112,39 @@ class OntologyAlignment:
         print("Lexical similarity computed")
 
         self.compute_cosine_similarity()
+        print("Cosine similarity computed")
         
         # Antes de retornar filtrar por este MIN_THRESHOLD
         self.final_alignment = {key: value for key, value in self.final_alignment.items() if value >= MIN_THRESHOLD}
         
         return self.final_alignment
 
+    def one_to_one_alignment(self):
+        
+        print("One to one alignment")
+
+        triplos = [(key[0], key[1], value) for key, value in self.final_alignment.items()]
+
+        df = pd.DataFrame(triplos, columns=['ontology 1', 'ontology 2', 'score'])
+        # Clean the left side 
+        toDrop = set()
+        for index, row in df.iterrows():
+            duplicates = df[df["ontology 1"] == row['ontology 1']]
+            if len(duplicates) > 1:
+                indexes = set(duplicates[duplicates["score"] < max(duplicates["score"])].index.values.tolist())
+                toDrop |= indexes
+
+        droped_left = df.drop(toDrop)
+
+        # Clean the right side
+        toDrop2 = set()
+        for index, row in droped_left.iterrows():
+            duplicates = droped_left[droped_left["ontology 2"] == row['ontology 2']]
+
+            if len(duplicates) > 1:
+                indexes = set(duplicates[duplicates["score"] < max(duplicates["score"])].index.values.tolist())
+                toDrop2 |= indexes
+
+        self.final_alignment = droped_left.drop(toDrop2)
+        print("One to one alignment: Finished!")
+        return self.final_alignment.sort_values(by='score', ascending=False)

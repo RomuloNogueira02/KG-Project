@@ -31,7 +31,13 @@ class AlignmentFrame(ctk.CTkFrame):
         # print(self.ontology_alignment_min_threshold)
 
         result = self.ontology_alignment.compute_alignment(self.ontology_alignment_min_threshold)
-        with open("alignment_result.pkl", "wb") as f:
-            pickle.dump(result, f)
+
+
+        # with open("alignment_result.pkl", "wb") as f:
+        #     pickle.dump(result, f)
+
+        result_df = self.ontology_alignment.one_to_one_alignment()
+        result_df.to_excel('alignment_result.xlsx', index=False)
+
         end = time.time()
         self.text_time.set(f"Time: {convert_seconds(end-start)}s")
