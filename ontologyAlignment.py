@@ -63,22 +63,22 @@ class OntologyAlignment:
         else:
             raise ValueError("The lexical similarity must be Jaccard, Levenshtein, Binary, Masi, Jaro or Jaro-Winkler")
         
-    
+
     def compute_lexical_similarity(self, MIN_THRESHOLD=0.8):
         scores_lexical_similarity = {}
         for l1 in self.labels_o1:
-            for l2 in self.labels_o2:            
-                if self.lexical_similarity == "Jaccard":
-                    set_l1 = set(l1.split())
-                    set_l2 = set(l2.split())
+            for l2 in self.labels_o2:
+                if (l1, l2) not in scores_lexical_similarity and (l2, l1) not in scores_lexical_similarity:
+                    if self.lexical_similarity == "Jaccard":
+                        set_l1 = set(l1.split())
+                        set_l2 = set(l2.split())
 
-                    scores_lexical_similarity[(l1, l2)] = 1 - self.func(set_l1, set_l2)
-                else:
-                    scores_lexical_similarity[(l1, l2)] = self.func(l1, l2)
+                        scores_lexical_similarity[(l1, l2)] = 1 - self.func(set_l1, set_l2)
+                    else:
+                        scores_lexical_similarity[(l1, l2)] = self.func(l1, l2)
 
         self.final_alignment = {key: value for key, value in scores_lexical_similarity.items() if value >= MIN_THRESHOLD}
         self.remaining = {key: value for key, value in scores_lexical_similarity.items() if value < MIN_THRESHOLD}
-
 
     def compute_cosine_similarity(self):
         lexical_cosine_similarity = {}
