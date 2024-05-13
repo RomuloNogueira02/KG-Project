@@ -22,13 +22,13 @@ class AlignmentFrame(ctk.CTkFrame):
 
     def align_ontologies(self):
         
-        print(self.master.children)
+        # print(self.master.children)
 
         start = time.time()
 
         self.ontology_alignment_min_threshold = self.master.children["!similaritiesframe"].get_min_threshold()
 
-        print(self.ontology_alignment_min_threshold)
+        # print(self.ontology_alignment_min_threshold)
 
         result = self.ontology_alignment.compute_alignment(self.ontology_alignment_min_threshold)
         with open("alignment_result.pkl", "wb") as f:

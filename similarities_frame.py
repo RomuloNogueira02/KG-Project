@@ -32,7 +32,7 @@ class SimilaritiesFrame(ctk.CTkFrame):
         self.min_threshold_value.set(0.8)
 
         self.min_threshold_entry = ctk.CTkEntry(self, textvariable=self.min_threshold_value)
-        self.min_threshold_entry.place(anchor="w", relx=0.15, rely=0.8)
+        self.min_threshold_entry.place(anchor="w", relx=0.15, rely=0.9)
 
         # ------------------
 
