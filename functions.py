@@ -25,3 +25,9 @@ def normalize_string(s):
     # Remove extra spaces
     s = re.sub(r'\s+', ' ', s).strip()
     return s
+
+def convert_seconds(sec):
+    sec = int(sec)
+    minu = sec // 60
+    sec_remaining = sec % 60
+    return f"{minu:02d}:{sec_remaining:02d}"
