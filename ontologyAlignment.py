@@ -3,6 +3,7 @@ import time
 from nltk.metrics import binary_distance, edit_distance, jaccard_distance, masi_distance
 from jarowinkler import jaro_similarity, jarowinkler_similarity
 from sentence_transformers import SentenceTransformer, util
+from transformers import AutoModel, AutoTokenizer, pipeline
 import pandas as pd
 
 
@@ -45,8 +46,12 @@ class OntologyAlignment:
             self.string_embedding[label] = self.llm.encode(label)
     
     def define_llm_model(self, llm="all-mpnet-base-v2"):
-        self.llm = SentenceTransformer(llm)
-        
+        if llm in ["all-mpnet-base-v2", "paraphrase-MiniLM-L6-v2", "distilbert-base-nli-stsb-mean-tokens"]:
+            self.llm = SentenceTransformer(llm)
+        else: #! bert-base-uncased
+            self.tokenizer = AutoTokenizer.from_pretrained(llm)
+            self.model = AutoModel.from_pretrained(llm)
+            self.llm_pipeline = pipeline('feature-extraction', model=self.model, tokenizer=self.tokenizer)
 
     def define_lexical_function(self, lexical_similarity ="Jaccard"):
         if lexical_similarity == "Jaccard":
@@ -69,13 +74,28 @@ class OntologyAlignment:
         scores_lexical_similarity = {}
         for l1 in self.labels_o1:
             for l2 in self.labels_o2:
-                if self.lexical_similarity == "Jaccard":
+                if self.lexical_similarity == "Jaccard" or self.lexical_similarity == "Masi":
                     set_l1 = set(l1.split())
                     set_l2 = set(l2.split())
-
                     scores_lexical_similarity[(l1, l2)] = 1 - self.func(set_l1, set_l2)
+                elif self.lexical_similarity == "Levenshtein":
+                    scores_lexical_similarity[(l1, l2)] = 1 - (self.func(l1, l2) / max(len(l1), len(l2)))
+                elif self.lexical_similarity == "Binary":
+                    scores_lexical_similarity[(l1, l2)] = 1 - self.func(l1, l2)
+                elif self.lexical_similarity == "Jaro":
+                    scores_lexical_similarity[(l1, l2)] = self.func(l1, l2)
+                elif self.lexical_similarity == "Jaro-Winkler":
+                    scores_lexical_similarity[(l1, l2)] = self.func(l1, l2)
                 else:
                     scores_lexical_similarity[(l1, l2)] = self.func(l1, l2)
+
+                # if self.lexical_similarity == "Jaccard":
+                #     set_l1 = set(l1.split())
+                #     set_l2 = set(l2.split())
+
+                #     scores_lexical_similarity[(l1, l2)] = 1 - self.func(set_l1, set_l2)
+                # else:
+                #     scores_lexical_similarity[(l1, l2)] = self.func(l1, l2)
 
         self.final_alignment = {key: value for key, value in scores_lexical_similarity.items() if value >= MIN_THRESHOLD}
         palavras_unicas = {palavra for tupla in self.final_alignment.keys() for palavra in tupla}

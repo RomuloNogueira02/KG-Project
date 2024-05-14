@@ -20,7 +20,7 @@ class SimilaritiesFrame(ctk.CTkFrame):
         self.llm_text = ctk.CTkLabel(self, text="LLM Model: ", font=("Arial", 15))
         self.llm_text.place(anchor="w", relx=0.01, rely=0.6)
 
-        self.llm_options = ctk.CTkOptionMenu(self, values=["all-mpnet-base-v2"], command=self.update_llm_model)
+        self.llm_options = ctk.CTkOptionMenu(self, values=["all-mpnet-base-v2", "paraphrase-MiniLM-L6-v2", "distilbert-base-nli-stsb-mean-tokens", "bert-base-uncased"], command=self.update_llm_model)
         self.llm_options.place(anchor="w", relx=0.15, rely=0.6)
 
         # ------------------
@@ -57,8 +57,6 @@ class SimilaritiesFrame(ctk.CTkFrame):
         self.status_label = ctk.CTkLabel(self, textvariable= self.status, font=("Arial", 15))
         self.status_label.place(anchor="w", relx=0.7, rely=0.6)
     
-
-    
     def create_infos(self):
         self.lexical_similarity = tk.StringVar()
         self.lexical_similarity.set("Current Lexical Similarity: Jaccard")
@@ -70,12 +68,10 @@ class SimilaritiesFrame(ctk.CTkFrame):
         self.ontology2_loaded.set("Ontology 2: Not loaded")
         self.status = tk.StringVar()
         self.status.set("General State: Not ready")
-
-
+    
     def update_lexical_similarity(self, value):
         self.lexical_similarity.set(f"Current Lexical Similarity: {value}")
         self.master.children["!alignmentframe"].ontology_alignment.define_lexical_function(value)
-    
 
     def update_llm_model(self, value):
         self.llm_model.set(f"Current LLM Model: {value}")
