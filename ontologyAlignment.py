@@ -75,53 +75,39 @@ class OntologyAlignment:
         for l1 in self.labels_o1:
             for l2 in self.labels_o2:
                 if self.lexical_similarity == "Jaccard" or self.lexical_similarity == "Masi":
-                    set_l1 = set(l1.split())
-                    set_l2 = set(l2.split())
+                    set_l1 = set(l1[1].split())
+                    set_l2 = set(l2[1].split())
                     scores_lexical_similarity[(l1, l2)] = 1 - self.func(set_l1, set_l2)
+
                 elif self.lexical_similarity == "Levenshtein":
-                    scores_lexical_similarity[(l1, l2)] = 1 - (self.func(l1, l2) / max(len(l1), len(l2)))
+                    scores_lexical_similarity[(l1, l2)] = 1 - (self.func(l1[1], l2[1]) / max(len(l1[1]), len(l2[1])))
                 elif self.lexical_similarity == "Binary":
-                    scores_lexical_similarity[(l1, l2)] = 1 - self.func(l1, l2)
+                    scores_lexical_similarity[(l1, l2)] = 1 - self.func(l1[1], l2[1])
                 elif self.lexical_similarity == "Jaro":
-                    scores_lexical_similarity[(l1, l2)] = self.func(l1, l2)
+                    scores_lexical_similarity[(l1, l2)] = self.func(l1[1], l2[1])
                 elif self.lexical_similarity == "Jaro-Winkler":
-                    scores_lexical_similarity[(l1, l2)] = self.func(l1, l2)
+                    scores_lexical_similarity[(l1, l2)] = self.func(l1[1], l2[1])
                 else:
-                    scores_lexical_similarity[(l1, l2)] = self.func(l1, l2)
-
-                # if self.lexical_similarity == "Jaccard":
-                #     set_l1 = set(l1.split())
-                #     set_l2 = set(l2.split())
-
-                #     scores_lexical_similarity[(l1, l2)] = 1 - self.func(set_l1, set_l2)
-                # else:
-                #     scores_lexical_similarity[(l1, l2)] = self.func(l1, l2)
+                    scores_lexical_similarity[(l1, l2)] = self.func(l1[1], l2[1])
 
         self.final_alignment = {key: value for key, value in scores_lexical_similarity.items() if value >= MIN_THRESHOLD}
-        palavras_unicas = {palavra for tupla in self.final_alignment.keys() for palavra in tupla}
-        self.remaining = {key: value for key, value in scores_lexical_similarity.items() if (value < MIN_THRESHOLD and not any(palavra in palavras_unicas for palavra in key))}
+        palavras_unicas = {palavra[1] for tupla in self.final_alignment.keys() for palavra in tupla}
+        self.remaining = {key: value for key, value in scores_lexical_similarity.items() if (value < MIN_THRESHOLD and not any(palavra[1] in palavras_unicas for palavra in key))}
 
     def compute_cosine_similarity(self):
 
         print("Loading embeddings...")
-        words = {palavra for tupla in self.remaining.keys() for palavra in tupla}
+        words = {palavra[1] for tupla in self.remaining.keys() for palavra in tupla}
         self.load_embeddings(words)
 
         print("Embeddings loaded")
 
 
         lexical_cosine_similarity = {}
-        # progress = 0
         for t in self.remaining.items():
-            embedding1 = self.string_embedding[t[0][0]]
-            embedding2 = self.string_embedding[t[0][1]]
+            embedding1 = self.string_embedding[t[0][0][1]]
+            embedding2 = self.string_embedding[t[0][1][1]]
             lexical_cosine_similarity[t[0]] = max(t[1], util.cos_sim(embedding1, embedding2)[0][0].item())
-            # progress += 1
-
-            # percent = calculate_progress(progress, len(self.remaining))
-            # if percent in [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
-            #     print(f"{percent}% completed")
-
 
         self.final_alignment.update(lexical_cosine_similarity)
         self.remaining.clear()
@@ -143,13 +129,13 @@ class OntologyAlignment:
         
         print("One to one alignment")
 
-        triplos = [(key[0], key[1], value) for key, value in self.final_alignment.items()]
+        quintuplo = [(key[0][0], key[0][1], key[1][0], key[1][1], value) for key, value in self.final_alignment.items()]
 
-        df = pd.DataFrame(triplos, columns=['ontology 1', 'ontology 2', 'score'])
+        df = pd.DataFrame(quintuplo, columns=['uri_o1', 'label_o1', 'uri_o2', 'label_o2', 'score'])
         # Clean the left side 
         toDrop = set()
         for index, row in df.iterrows():
-            duplicates = df[df["ontology 1"] == row['ontology 1']]
+            duplicates = df[df["uri_o1"] == row['uri_o1']]
             if len(duplicates) > 1:
                 indexes = set(duplicates[duplicates["score"] < max(duplicates["score"])].index.values.tolist())
                 toDrop |= indexes
@@ -159,7 +145,7 @@ class OntologyAlignment:
         # Clean the right side
         toDrop2 = set()
         for index, row in droped_left.iterrows():
-            duplicates = droped_left[droped_left["ontology 2"] == row['ontology 2']]
+            duplicates = droped_left[droped_left["uri_o2"] == row['uri_o2']]
 
             if len(duplicates) > 1:
                 indexes = set(duplicates[duplicates["score"] < max(duplicates["score"])].index.values.tolist())
