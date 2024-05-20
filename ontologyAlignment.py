@@ -26,7 +26,7 @@ class OntologyAlignment:
     def load_ontology(self, path):
         
         ontology = loadOntology(path)
-        labels = get_labels(ontology) 
+        labels = get_labels(ontology.base_iri, ontology) 
         
         if self.ontology1_loaded == False:
             self.ontology1 = ontology

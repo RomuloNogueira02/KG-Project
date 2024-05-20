@@ -10,9 +10,15 @@ def loadOntology(path: str) -> Ontology:
     else:
         raise FileNotFoundError("The file does not exist")
     
-def get_labels(ontology):
+
+def calculate_entity(base, entity):
+    entity = entity.split(".")[1]
+    return base + entity
+
+
+def get_labels(base, ontology):
     # Get labels from ontology that are not empty
-    raw_labels = list(map(lambda entity: (entity, normalize_string(entity.label[0]) if len(entity.label) > 0 else ""), ontology.classes()))
+    raw_labels = list(map(lambda entity: (calculate_entity(base, str(entity)), normalize_string(entity.label[0]) if len(entity.label) > 0 else ""), ontology.classes()))
     filtered_labels = list(filter(lambda label: label[1] != "", raw_labels))
     return filtered_labels
 
