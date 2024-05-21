@@ -18,23 +18,30 @@ class SimilaritiesFrame(ctk.CTkFrame):
         # ------------------
 
         self.llm_text = ctk.CTkLabel(self, text="LLM Model: ", font=("Arial", 15))
-        self.llm_text.place(anchor="w", relx=0.01, rely=0.6)
+        self.llm_text.place(anchor="w", relx=0.01, rely=0.5)
 
         self.llm_options = ctk.CTkOptionMenu(self, values=["all-mpnet-base-v2", "paraphrase-MiniLM-L6-v2", "distilbert-base-nli-stsb-mean-tokens", "bert-base-uncased"], command=self.update_llm_model)
-        self.llm_options.place(anchor="w", relx=0.15, rely=0.6)
+        self.llm_options.place(anchor="w", relx=0.15, rely=0.5)
 
         # ------------------
 
         self.min_threshold_text = ctk.CTkLabel(self, text="Minimum Threshold: ", font=("Arial", 15))
-        self.min_threshold_text.place(anchor="w", relx=0.01, rely=0.9)
+        self.min_threshold_text.place(anchor="w", relx=0.01, rely=0.7)
 
         self.min_threshold_value = tk.DoubleVar()
         self.min_threshold_value.set(0.8)
 
         self.min_threshold_entry = ctk.CTkEntry(self, textvariable=self.min_threshold_value)
-        self.min_threshold_entry.place(anchor="w", relx=0.15, rely=0.9)
+        self.min_threshold_entry.place(anchor="w", relx=0.15, rely=0.7)
 
         # ------------------
+
+        self.export_file = ctk.CTkLabel(self, text="Export format: ", font=("Arial", 15))
+        self.export_file.place(anchor="w", relx=0.01, rely=.9)
+
+        self.export_file = ctk.CTkOptionMenu(self, values=[".xlsx", ".tsv"], command=self.update_export)
+        self.export_file.place(anchor="w", relx=0.15, rely=.9)
+        #-----------------
 
         self.create_infos()
 
@@ -68,6 +75,7 @@ class SimilaritiesFrame(ctk.CTkFrame):
         self.ontology2_loaded.set("Ontology 2: Not loaded")
         self.status = tk.StringVar()
         self.status.set("General State: Not ready")
+        self.export_method = tk.StringVar()
     
     def update_lexical_similarity(self, value):
         self.lexical_similarity.set(f"Current Lexical Similarity: {value}")
@@ -76,6 +84,10 @@ class SimilaritiesFrame(ctk.CTkFrame):
     def update_llm_model(self, value):
         self.llm_model.set(f"Current LLM Model: {value}")
         self.master.children["!alignmentframe"].ontology_alignment.define_llm_model(value)
+    
+    def update_export(self,value):
+        self.export_method = value
+        self.master.children["!alignmentframe"].export_method = value
 
 
     def get_min_threshold(self):

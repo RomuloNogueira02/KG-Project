@@ -19,6 +19,7 @@ class AlignmentFrame(ctk.CTkFrame):
         self.time.place(anchor="center", relx=0.5, rely=0.8)
         
         self.ontology_alignment = OntologyAlignment()
+        self.export_method = ".xlsx"
 
     def align_ontologies(self):
         
@@ -37,8 +38,10 @@ class AlignmentFrame(ctk.CTkFrame):
         #     pickle.dump(result, f)
 
         result_df = self.ontology_alignment.one_to_one_alignment()
-        #result_df.to_excel('alignment_result.xlsx', index=False)
-        result_df.to_csv('alignment_result.tsv', sep='\t', index=False)
+        if self.export_method == ".xlsx":
+            result_df.to_excel('alignment_result.xlsx', index=False)
+        else:
+            result_df.to_csv('alignment_result.tsv', sep='\t', index=False)
 
         end = time.time()
         self.text_time.set(f"Time: {convert_seconds(end-start)}s")
