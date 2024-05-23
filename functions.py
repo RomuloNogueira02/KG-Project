@@ -24,6 +24,19 @@ def get_labels(base, ontology):
     filtered_labels = list(filter(lambda label: label[1] != "", raw_labels))
     return filtered_labels
 
+def get_syns(base, ontology):
+    raw_syns = []
+    for e in ontology.classes():
+        entity = calculate_entity(base, str(e))
+        try:
+            for syn in e.hasRelatedSynonym:
+                raw_syns.append((entity, normalize_string(syn.label[0])))
+        except:
+            pass
+
+    filtered_syns = list(filter(lambda label: label[1] != "", raw_syns))
+    return filtered_syns
+
 
 def normalize_string(s):
     # Convert to lowercase

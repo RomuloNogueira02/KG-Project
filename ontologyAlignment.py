@@ -22,11 +22,19 @@ class OntologyAlignment:
         self.final_alignment = {}
         self.remaining = {}
 
+        self.syn_extract = True
+
 
     def load_ontology(self, path):
         
         ontology = loadOntology(path)
         labels = get_labels(ontology.base_iri, ontology) 
+
+        if self.syn_extract:
+            # Extract synonyms
+            labels.extend(get_syns(ontology.base_iri, ontology))
+        
+        print("Labels:", len(labels))
 
         self.path = "/".join(path.split("/")[:-1])
         
@@ -39,7 +47,6 @@ class OntologyAlignment:
             self.labels_o2 = labels
             self.ontology2_loaded = True
 
-            # self.load_embeddings(list(set(self.labels_o1).union(set(self.labels_o2))))
 
 
     def load_embeddings(self, set_labels: set):
@@ -70,6 +77,12 @@ class OntologyAlignment:
             self.func = jarowinkler_similarity
         else:
             raise ValueError("The lexical similarity must be Jaccard, Levenshtein, Binary, Masi, Jaro or Jaro-Winkler")
+        
+    def define_syn_extract(self, option):
+        if option == "Yes":
+            self.syn_extract = True
+        else:
+            self.syn_extract = False
         
 
     def compute_lexical_similarity(self, MIN_THRESHOLD=0.85):

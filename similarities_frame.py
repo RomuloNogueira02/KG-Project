@@ -90,5 +90,7 @@ class SimilaritiesFrame(ctk.CTkFrame):
         self.master.children["!alignmentframe"].export_method = value
 
 
+
+
     def get_min_threshold(self):
         return self.min_threshold_value.get()

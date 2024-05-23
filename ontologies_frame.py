@@ -8,6 +8,14 @@ class OntologiesFrame(ctk.CTkFrame):
     def __init__(self, master) -> None:
         super().__init__(master, border_width=1, height=200, width=1000, border_color="green")
 
+
+        self.extract_syn_label = ctk.CTkLabel(self, text="Extract Synonyms: ", font=("Arial", 15))
+        self.extract_syn_label.place(anchor="w", relx=0.01, rely=0.3)
+
+        self.extract_syn_options = ctk.CTkOptionMenu(self, values=["Yes", "No"], command=self.update_syn)
+        self.extract_syn_options.place(anchor="w", relx=0.15, rely=0.3)
+
+
         self.ontology1_label = ctk.CTkLabel(self, text="Ontology 1", font=("Arial", 12))
         self.ontology1_label.place(anchor="w", relx=0.3, rely=0.3)
 
@@ -52,4 +60,5 @@ class OntologiesFrame(ctk.CTkFrame):
         
         
 
-    
+    def update_syn(self, value):
+        self.master.children["!alignmentframe"].ontology_alignment.define_syn_extract(value)
