@@ -29,19 +29,23 @@ class OntologyAlignment:
         
         ontology = loadOntology(path)
         labels = get_labels(ontology.base_iri, ontology) 
+        print("Extracted", len(labels), "labels")
 
         if self.syn_extract:
             # Extract synonyms
-            labels.extend(get_syns(ontology.base_iri, ontology))
+            syns = get_syns(ontology.base_iri, ontology)
+            labels.extend(syns)
+            print("And", len(syns), "synonyms")
+            print("Total of", len(labels), "labels")
+            print()
         
-        print("Labels:", len(labels))
-
         self.path = "/".join(path.split("/")[:-1])
         
         if self.ontology1_loaded == False:
             self.ontology1 = ontology
             self.labels_o1 = labels
             self.ontology1_loaded = True
+
         else:
             self.ontology2 = ontology
             self.labels_o2 = labels
@@ -106,13 +110,18 @@ class OntologyAlignment:
                     scores_lexical_similarity[(l1, l2)] = self.func(l1[1], l2[1])
 
         self.final_alignment = {key: value for key, value in scores_lexical_similarity.items() if value >= MIN_THRESHOLD}
+        print("Classified", len(self.final_alignment), "pairs of labels with a score greater than", MIN_THRESHOLD)
+        print("(include duplicates)")
         palavras_unicas = {palavra[1] for tupla in self.final_alignment.keys() for palavra in tupla}
         self.remaining = {key: value for key, value in scores_lexical_similarity.items() if (value < MIN_THRESHOLD and not any(palavra[1] in palavras_unicas for palavra in key))}
+        print("Remaining pairs to be checked:", len(self.remaining))
+        print()
 
     def compute_cosine_similarity(self):
-
+        
         print("Loading embeddings...")
         words = {palavra[1] for tupla in self.remaining.keys() for palavra in tupla}
+        print("for", len(words), "words")
         self.load_embeddings(words)
 
         print("Embeddings loaded")
@@ -125,15 +134,18 @@ class OntologyAlignment:
             lexical_cosine_similarity[t[0]] = max(t[1], util.cos_sim(embedding1, embedding2)[0][0].item())
 
         self.final_alignment.update(lexical_cosine_similarity)
+        print("Final alignment updated with cosine similarity")
+        print("Now it has a total of", len(self.final_alignment), "pairs of labels")
         self.remaining.clear()
     
     def compute_alignment(self, MIN_THRESHOLD=0.80):
 
         self.compute_lexical_similarity()
         print("Lexical similarity computed")
-
+        print()
         self.compute_cosine_similarity()
         print("Cosine similarity computed")
+        print()
         
         # Antes de retornar filtrar por este MIN_THRESHOLD
         self.final_alignment = {key: value for key, value in self.final_alignment.items() if value >= MIN_THRESHOLD}
@@ -167,5 +179,7 @@ class OntologyAlignment:
                 toDrop2 |= indexes
 
         self.final_alignment = droped_left.drop(toDrop2)
-        print("One to one alignment: Finished!")
+        print("One to one alignment done!")
+        print("Now it has a total of", len(self.final_alignment), "pairs of labels")
+        print()
         return self.final_alignment.sort_values(by='score', ascending=False)

@@ -3,7 +3,7 @@ import tkinter as tk
 
 class SimilaritiesFrame(ctk.CTkFrame):
     def __init__(self, master) -> None:
-        super().__init__(master, border_width=1, height=250, width=1000, border_color="blue")
+        super().__init__(master, border_width=1, height=250, width=1000)
         
 
         title = ctk.CTkLabel(self, text="Activate", font=("Arial", 18))
