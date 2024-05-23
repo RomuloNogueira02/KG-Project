@@ -3,7 +3,7 @@ import pickle
 from ontologyAlignment import OntologyAlignment
 import time
 import tkinter as tk
-from functions import convert_seconds
+from functions import convert_seconds, create_XML_file
 
 class AlignmentFrame(ctk.CTkFrame):
     def __init__(self, master) -> None:
@@ -19,17 +19,13 @@ class AlignmentFrame(ctk.CTkFrame):
         self.time.place(anchor="center", relx=0.5, rely=0.8)
         
         self.ontology_alignment = OntologyAlignment()
-        self.export_method = ".xlsx"
+        self.export_method = ".rdf"
 
     def align_ontologies(self):
         
-        # print(self.master.children)
-
         start = time.time()
 
         self.ontology_alignment_min_threshold = self.master.children["!similaritiesframe"].get_min_threshold()
-
-        # print(self.ontology_alignment_min_threshold)
 
         result = self.ontology_alignment.compute_alignment(self.ontology_alignment_min_threshold)
 
@@ -41,7 +37,7 @@ class AlignmentFrame(ctk.CTkFrame):
         if self.export_method == ".xlsx":
             result_df.to_excel('alignment_result.xlsx', index=False)
         else:
-            result_df.to_csv('alignment_result.tsv', sep='\t', index=False)
+            create_XML_file(result_df, self.ontology_alignment.path)
 
         end = time.time()
         self.text_time.set(f"Time: {convert_seconds(end-start)}s")

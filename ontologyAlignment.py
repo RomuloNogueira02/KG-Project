@@ -27,6 +27,8 @@ class OntologyAlignment:
         
         ontology = loadOntology(path)
         labels = get_labels(ontology.base_iri, ontology) 
+
+        self.path = "/".join(path.split("/")[:-1])
         
         if self.ontology1_loaded == False:
             self.ontology1 = ontology
@@ -102,7 +104,7 @@ class OntologyAlignment:
 
         print("Embeddings loaded")
 
-
+        print("Computing cosine similarity...")
         lexical_cosine_similarity = {}
         for t in self.remaining.items():
             embedding1 = self.string_embedding[t[0][0][1]]

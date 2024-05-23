@@ -1,7 +1,9 @@
 from owlready2 import *
 import os
 import re
-import Levenshtein
+import pandas as pd
+import xml.etree.ElementTree as ET
+
 
 def loadOntology(path: str) -> Ontology:
     # print(path)
@@ -44,3 +46,36 @@ def calculate_progress(current, total):
         return 100.0 if current == 0 else float('inf')
     else:
         return (current / total) * 100
+    
+
+def create_XML_file(alignment_df, output_path):
+
+    # Create the root element
+    rdf = ET.Element('rdf:RDF', {
+        'xmlns': "http://knowledgeweb.semanticweb.org/heterogeneity/alignment",
+        'xmlns:rdf': "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        'xmlns:xsd': "http://www.w3.org/2001/XMLSchema#"
+    })
+
+
+    # Create the Alignment element
+    alignment = ET.SubElement(rdf, 'Alignment')
+
+    # Add xml, level, and type elements
+    ET.SubElement(alignment, 'xml').text = 'yes'
+    ET.SubElement(alignment, 'level').text = '0'
+    ET.SubElement(alignment, 'type').text = '??'
+
+
+    for _, row in alignment_df.iterrows():
+        map_element = ET.SubElement(alignment, 'map')
+        cell = ET.SubElement(map_element, 'Cell')
+        ET.SubElement(cell, 'entity1', {'rdf:resource': row['uri_o1']})
+        ET.SubElement(cell, 'entity2', {'rdf:resource': row['uri_o2']})
+        ET.SubElement(cell, 'measure', {'rdf:datatype': 'xsd:float'}).text = str(row['score'])
+        ET.SubElement(cell, 'relation').text = '='
+
+    # Create an ElementTree object from the root element
+    tree = ET.ElementTree(rdf)
+
+    tree.write(output_path + '/output.rdf', encoding='utf-8', xml_declaration=True)

@@ -39,7 +39,7 @@ class SimilaritiesFrame(ctk.CTkFrame):
         self.export_file = ctk.CTkLabel(self, text="Export format: ", font=("Arial", 15))
         self.export_file.place(anchor="w", relx=0.01, rely=.9)
 
-        self.export_file = ctk.CTkOptionMenu(self, values=[".xlsx", ".tsv"], command=self.update_export)
+        self.export_file = ctk.CTkOptionMenu(self, values=[".rdf", ".xlsx"], command=self.update_export)
         self.export_file.place(anchor="w", relx=0.15, rely=.9)
         #-----------------
 
