@@ -112,8 +112,8 @@ class OntologyAlignment:
         self.final_alignment = {key: value for key, value in scores_lexical_similarity.items() if value >= MIN_THRESHOLD}
         print("Classified", len(self.final_alignment), "pairs of labels with a score greater than", MIN_THRESHOLD)
         print("(include duplicates)")
-        palavras_unicas = {palavra[1] for tupla in self.final_alignment.keys() for palavra in tupla}
-        self.remaining = {key: value for key, value in scores_lexical_similarity.items() if (value < MIN_THRESHOLD and not any(palavra[1] in palavras_unicas for palavra in key))}
+        palavras_unicas = {palavra[0] for tupla in self.final_alignment.keys() for palavra in tupla}
+        self.remaining = {key: value for key, value in scores_lexical_similarity.items() if (value < MIN_THRESHOLD and not any(palavra[0] in palavras_unicas for palavra in key))}
         print("Remaining pairs to be checked:", len(self.remaining))
         print()
 
