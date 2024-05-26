@@ -12,7 +12,7 @@ class SimilaritiesFrame(ctk.CTkFrame):
         self.lexical_similarity_text = ctk.CTkLabel(self, text="Lexical Similarity: ", font=("Arial", 15))
         self.lexical_similarity_text.place(anchor="w", relx=0.01, rely=0.3)
 
-        self.lexical_similarity_options = ctk.CTkOptionMenu(self, values=["Jaccard", "Levenshtein", "Binary", "Masi", "Jaro", "Jaro-Winkler"], command=self.update_lexical_similarity)
+        self.lexical_similarity_options = ctk.CTkOptionMenu(self, values=["Jaccard", "Binary", "Masi", "Jaro", "Jaro-Winkler"], command=self.update_lexical_similarity)
         self.lexical_similarity_options.place(anchor="w", relx=0.15, rely=0.3)
 
         # ------------------

@@ -1,6 +1,6 @@
 from functions import *
 import time
-from nltk.metrics import binary_distance, edit_distance, jaccard_distance, masi_distance
+from nltk.metrics import binary_distance, jaccard_distance, masi_distance
 from jarowinkler import jaro_similarity, jarowinkler_similarity
 from sentence_transformers import SentenceTransformer, util
 from transformers import AutoModel, AutoTokenizer, pipeline
@@ -69,8 +69,6 @@ class OntologyAlignment:
     def define_lexical_function(self, lexical_similarity ="Jaccard"):
         if lexical_similarity == "Jaccard":
             self.func = jaccard_distance
-        elif lexical_similarity == "Levenshtein":
-            self.func = edit_distance
         elif lexical_similarity == "Binary":
             self.func = binary_distance
         elif lexical_similarity == "Masi":
@@ -80,7 +78,7 @@ class OntologyAlignment:
         elif lexical_similarity == "Jaro-Winkler":
             self.func = jarowinkler_similarity
         else:
-            raise ValueError("The lexical similarity must be Jaccard, Levenshtein, Binary, Masi, Jaro or Jaro-Winkler")
+            raise ValueError("The lexical similarity must be Jaccard, Binary, Masi, Jaro or Jaro-Winkler")
         
         self.lexical_similarity = lexical_similarity
         
@@ -102,8 +100,6 @@ class OntologyAlignment:
                     set_l2 = set(l2[1].split())
                     scores_lexical_similarity[(l1, l2)] = 1 - self.func(set_l1, set_l2)
 
-                elif self.lexical_similarity == "Levenshtein":
-                    scores_lexical_similarity[(l1, l2)] = 1 - (self.func(l1[1], l2[1]) / max(len(l1[1]), len(l2[1])))
                 elif self.lexical_similarity == "Binary":
                     scores_lexical_similarity[(l1, l2)] = 1 - self.func(l1[1], l2[1])
                 elif self.lexical_similarity == "Jaro":
