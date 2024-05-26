@@ -82,6 +82,10 @@ class OntologyAlignment:
         else:
             raise ValueError("The lexical similarity must be Jaccard, Levenshtein, Binary, Masi, Jaro or Jaro-Winkler")
         
+        self.lexical_similarity = lexical_similarity
+        
+
+        
     def define_syn_extract(self, option):
         if option == "Yes":
             self.syn_extract = True
