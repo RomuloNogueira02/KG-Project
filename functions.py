@@ -18,10 +18,15 @@ def calculate_entity(base, entity):
     return base + entity
 
 
-def get_labels(base, ontology):
+def get_labels(base, ontology, type):
     # Get labels from ontology that are not empty
-    raw_labels = list(map(lambda entity: (calculate_entity(base, str(entity)), normalize_string(entity.label[0]) if len(entity.label) > 0 else ""), ontology.classes()))
+    if type == "label":
+        raw_labels = list(map(lambda entity: (calculate_entity(base, str(entity)), normalize_string(entity.label[0]) if len(entity.label) > 0 else ""), ontology.classes()))
+    else:
+        raw_labels = list(map(lambda entity: (calculate_entity(base, str(entity)), normalize_string(entity.hiddenLabel[0]) if len(entity.hiddenLabel) > 0 else ""), ontology.classes()))
+    
     filtered_labels = list(filter(lambda label: label[1] != "", raw_labels))
+
     return filtered_labels
 
 def get_syns(base, ontology):

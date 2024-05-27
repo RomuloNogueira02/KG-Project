@@ -24,11 +24,21 @@ class OntologyAlignment:
 
         self.syn_extract = True
 
+        self.type = "label"
+
 
     def load_ontology(self, path):
         
         ontology = loadOntology(path)
-        labels = get_labels(ontology.base_iri, ontology) 
+
+        # What type of label
+        for p in ontology.properties():
+            prop = str(p).split(".")[1]
+            if prop == "hiddenLabel":
+                self.type = "hiddenLabel"
+                break
+
+        labels = get_labels(ontology.base_iri, ontology, self.type) 
         print("Extracted", len(labels), "labels")
 
         if self.syn_extract:
